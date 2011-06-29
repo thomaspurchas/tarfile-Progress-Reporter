@@ -77,7 +77,7 @@ class TarFile(tarfile.TarFile):
 
         if fileobj is not None:
             
-            fileobj = filewrapper(fileobj, self.__progresscallback)
+            fileobj = filewrapper(fileobj, tarinfo, self.__progresscallback)
    
         return tarfile.TarFile.addfile(self, tarinfo, fileobj)
             
@@ -86,31 +86,30 @@ class filewrapper(object):
     This is a wrapper for a file object. I uses the __getattr__ function to cheat.
     '''
     
-    def __init__(self, fileobj, progress):
+    def __init__(self, fileobj, tarinfo, progress):
         self._fileobj = fileobj
+    
+        self._size = tarinfo.size
         
-        # Get the file length
-        currentpos = fileobj.tell()
-        
-        fileobj.seek(0, os.SEEK_END)
-        
-        self._length = fileobj.tell()
-        
-        fileobj.seek(currentpos, os.SEEK_SET)
-        
+        if self._size <= 0 or self._size is None:
+            # Invalid size, we will not bother with the progress
+            progress = None
+            
         if progress is not None:
             progress(0)
         self._progress = progress
         self._lastprogress = 0
+        
+        self._totalread = 0
         
         
     def read(self, size = -1):
         data = self._fileobj.read(size)
         
         if self._progress is not None:
-            progress = self._fileobj.tell()
-            
-            progress = (progress * 100) / self._length
+            self._totalread += len(data)
+
+            progress = (self._totalread * 100) / self._size
             
             if progress > self._lastprogress and progress <= 100:
                 self._progress(progress)
