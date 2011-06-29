@@ -74,7 +74,7 @@ class TarFile(tarfile.TarFile):
         On Windows platforms, `fileobj' should always be opened with mode
         'rb' to avoid irritation about the file size.
         """
-        print 'addfile'
+
         if fileobj is not None:
             
             fileobj = filewrapper(fileobj, self.__progresscallback)
