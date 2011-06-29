@@ -113,6 +113,7 @@ class filewrapper(object):
             
             if progress > self._lastprogress and progress <= 100:
                 self._progress(progress)
+                self._lastprogress = progress
         
         return data
         
