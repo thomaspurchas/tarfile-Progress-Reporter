@@ -58,7 +58,7 @@ from tarfile_progress import tarfile_progress as tarfile
 ### From the command line ###
 
 This example uses the included example function, and is
-done from the command line. (Additional whitespace has been added)
+done from the command line.
 
 ```
 >>> from tarfile_progress import tarfile_progress as tarfile
