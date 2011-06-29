@@ -22,13 +22,13 @@ class TarFile(tarfile.TarFile):
         can be determined, `mode' is overridden by `fileobj's mode.
         `fileobj' is not closed, when TarFile is closed.
         '''
-        
+
         self.__progresscallback = None
-        
+
         tarfile.TarFile.__init__(self, name, mode, fileobj, format,
                                  tarinfo, dereference, ignore_zeros, encoding,
                                  errors, pax_headers, debug, errorlevel)
-        
+
     def add(self, name, arcname=None, recursive=True, exclude=None, filter=None, progress=None):
         '''
         Add the file *name* to the archive. *name* may be any type of file (directory,
@@ -63,13 +63,13 @@ class TarFile(tarfile.TarFile):
             argument rather than as a positional argument so that code won't be
             affected when *exclude* is ultimately removed.
         '''
-        
+
         if progress is not None:
             progress(0)
             self.__progresscallback = progress
-            
+
         return tarfile.TarFile.add(self, name, arcname, recursive, exclude, filter)
-        
+
     def addfile(self, tarinfo, fileobj=None, progress=None):
         """
         Add the TarInfo object `tarinfo' to the archive. If `fileobj' is
@@ -78,55 +78,128 @@ class TarFile(tarfile.TarFile):
         On Windows platforms, `fileobj' should always be opened with mode
         'rb' to avoid irritation about the file size.
         """
-        
+
         if progress is not None:
             progress(0)
             self.__progresscallback = progress
-        
+
         if fileobj is not None:
-            
+
             fileobj = filewrapper(fileobj, tarinfo, self.__progresscallback)
-   
-        return tarfile.TarFile.addfile(self, tarinfo, fileobj)
-            
+
+        result = tarfile.TarFile.addfile(self, tarinfo, fileobj)
+
+        self.__progresscallback = None
+
+        return result
+
+    def extractall(self, path=".", members=None, progress=None):
+
+        self.__progresscallback = None
+
+        if progress is not None:
+            original = self.fileobj
+            try:
+                stats = os.fstat(self.fileobj)
+                stats.size = stats.st_size
+                self.fileobj = filewrapper(self.fileobj, stats, progress)
+                self.__progresscallback = None
+            except:
+                # This means that we have a stream of similar. So we will report
+                # file-by-file progress instead of total progress 
+                self.fileobj = original
+                self.__progresscallback = progress
+
+        result = tarfile.TarFile.extractall(self, path, members)
+
+        self.fileobj = original
+
+        return result
+
+    def extract(self, member, path="", progress=None):
+
+        if progress is not None:
+            progress(0)
+            self.__progresscallback = progress
+
+        result = tarfile.TarFile.extract(self, member, path)
+
+        self.__progresscallback = None
+
+        return result
+
+    def extractfile(self, member, progress=None):
+        """
+        Extract a member from the archive as a file object. `member' may be
+        a filename or a TarInfo object. If `member' is a regular file, a
+        file-like object is returned. If `member' is a link, a file-like
+        object is constructed from the link's target. If `member' is none of
+        the above, None is returned.
+        The file-like object is read-only and provides the following
+        methods: read(), readline(), readlines(), seek() and tell()
+        """
+
+        if progress is not None:
+            progress(0)
+            self.__progresscallback = progress
+
+        fileobj = tarfile.TarFile.extractfile(self, member)
+
+        if fileobj is not None:
+            fileobj = filewrapper(fileobj, member, self.__progresscallback)
+
+        return fileobj
+
 class filewrapper(object):
     '''
     This is a wrapper for a file object. I uses the __getattr__ function to cheat.
     '''
-    
+
     def __init__(self, fileobj, tarinfo, progress):
         self._fileobj = fileobj
-    
+
         self._size = tarinfo.size
-        
+
         if self._size <= 0 or self._size is None:
             # Invalid size, we will not bother with the progress
             progress = None
-            
+
         if progress is not None:
             progress(0)
         self._progress = progress
         self._lastprogress = 0
-        
+
         self._totalread = 0
-        
-        
-    def read(self, size = -1):
-        data = self._fileobj.read(size)
-        
+
+    def _updateprogress(self, length):
+        '''
+        Call this on every read to update our progress through the file
+        '''
         if self._progress is not None:
-            self._totalread += len(data)
+            self._totalread += length
 
             progress = (self._totalread * 100) / self._size
-            
+
             if progress > self._lastprogress and progress <= 100:
                 self._progress(progress)
                 self._lastprogress = progress
-        
+
+    def read(self, size= -1):
+        data = self._fileobj.read(size)
+
+        self._updateprogress(len(data))
+
         return data
-        
+
+    def readline(self, size= -1):
+        data = self._fileobj.readline(size)
+
+        self._updateprogress(len(data))
+
+        return data
+
     def __getattr__(self, name):
         return getattr(self._fileobj, name)
-    
+
 
 open = TarFile.open
