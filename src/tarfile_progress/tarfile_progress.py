@@ -6,6 +6,9 @@ Created on 29 Jun 2011
 import tarfile
 import os
 
+class sudotarinfo(object):
+    size = None
+
 class TarFile(tarfile.TarFile):
     '''
     classdocs
@@ -89,7 +92,7 @@ class TarFile(tarfile.TarFile):
 
         result = tarfile.TarFile.addfile(self, tarinfo, fileobj)
 
-        self.__progresscallback = None
+        #self.__progresscallback = None
 
         return result
 
@@ -100,13 +103,14 @@ class TarFile(tarfile.TarFile):
         if progress is not None:
             original = self.fileobj
             try:
-                stats = os.fstat(self.fileobj)
-                stats.size = stats.st_size
-                self.fileobj = filewrapper(self.fileobj, stats, progress)
+                stats = os.fstat(self.fileobj.fileno())
+                sudoinfo = sudotarinfo()
+                sudoinfo.size = stats.st_size
+                self.fileobj = filewrapper(self.fileobj, sudoinfo, progress)
                 self.__progresscallback = None
             except:
-                # This means that we have a stream of similar. So we will report
-                # file-by-file progress instead of total progress 
+                # This means that we have a stream or similar. So we will report
+                # file-by-file progress instead of total progress
                 self.fileobj = original
                 self.__progresscallback = progress
 
@@ -124,7 +128,7 @@ class TarFile(tarfile.TarFile):
 
         result = tarfile.TarFile.extract(self, member, path)
 
-        self.__progresscallback = None
+        #self.__progresscallback = None
 
         return result
 
@@ -201,5 +205,7 @@ class filewrapper(object):
     def __getattr__(self, name):
         return getattr(self._fileobj, name)
 
+    def __del__(self):
+        self._updateprogress(self._size - self._totalread)
 
 open = TarFile.open
