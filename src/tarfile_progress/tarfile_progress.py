@@ -112,7 +112,7 @@ class filewrapper(object):
             
             progress = (progress * 100) / self._length
             
-            if progress > self._lastprogress:
+            if progress > self._lastprogress and progress <= 100:
                 self._progress(progress)
         
         return data
