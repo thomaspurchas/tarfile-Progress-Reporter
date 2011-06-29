@@ -1,6 +1,6 @@
 '''
 Created on 29 Jun 2011
-
+Find the source and docs at https://github.com/thomaspurchas/tarfile-Progress-Reporter
 @author: Thomas Purchas
 '''
 import tarfile
