@@ -44,8 +44,12 @@ class TarFile(tarfile.TarFile):
         example.
         
         *progress* will be called with a signal integer with a value between 0 and 100,
-        which represents the percentage of the file that has been added. It is
-        guarrentied that the passed value will only increase.
+        which represents the percentage of the file that has been added.
+
+        ..  note::
+            Progress will be reported on a file-by-file basis. This means that the precentaged
+            passed will reset to zero on every new file. This is perticualy important is you are
+            using the *recursive* flag.
         
         ..  versionchanged:: 2.6
             Added the *exclude* parameter.
