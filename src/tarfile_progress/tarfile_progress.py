@@ -12,8 +12,7 @@ def progressprint(complete):
     progress callback then it will print a progress bar to stdout.
     '''
     barlen = complete / 2
-    print '\r|' + '#' * barlen + '-' * (50 - barlen) + '| ' +
-                       str(complete) + '%',
+    print '\r|' + '#' * barlen + '-' * (50 - barlen) + '|', str(complete) + '%',
 
     if complete == 100:
         print 'File complete'
