@@ -36,6 +36,7 @@ Replace the following:
 import tarfile
 ```
 with
+
 ```python
 from tarfile_progress import tarfile_progress as tarfile
 ```
@@ -46,4 +47,5 @@ Setting up a callback
 This uses the included example function.
 
 ```python
-dsafs```
+dsafs
+```
