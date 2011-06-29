@@ -101,7 +101,7 @@ class filewrapper(object):
         if progress is not None:
             progress(0)
         self._progress = progress
-        self._lastprogress
+        self._lastprogress = 0
         
         
     def read(self, size = -1):
