@@ -1,7 +1,7 @@
 # tarfile Progress Extension #
 
 This module is a wrapper around the
-standard tarfile libary in Python. It 
+standard tarfile library in Python. It
 adds the ability to pass a progress 
 callback to the following ```TarFile```
 methods:
@@ -19,7 +19,7 @@ per percentage increace, with a single integer
 value between 0 and 100.
 
 This module is a drop-in replacement for the 
-standard tarfile libary, and should only require
+standard tarfile library, and should only require
 the ```import``` statments be changes.
 
 ## Notes ##
