@@ -66,7 +66,7 @@ class TarFile(tarfile.TarFile):
             
         return tarfile.TarFile.add(self, name, arcname, recursive, exclude, filter)
         
-    def addfile(self, tarinfo, fileobj=None):
+    def addfile(self, tarinfo, fileobj=None, progress=None):
         """
         Add the TarInfo object `tarinfo' to the archive. If `fileobj' is
         given, tarinfo.size bytes are read from it and added to the archive.
@@ -74,7 +74,11 @@ class TarFile(tarfile.TarFile):
         On Windows platforms, `fileobj' should always be opened with mode
         'rb' to avoid irritation about the file size.
         """
-
+        
+        if progress is not None:
+            progress(0)
+            self.__progresscallback = progress
+        
         if fileobj is not None:
             
             fileobj = filewrapper(fileobj, tarinfo, self.__progresscallback)
