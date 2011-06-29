@@ -6,6 +6,19 @@ Created on 29 Jun 2011
 import tarfile
 import os
 
+def progressprint(complete):
+    '''
+    This is an example callback function. If you pass this as the
+    progress callback then it will print a progress bar to stdout.
+    '''
+    barlen = complete / 2
+    print '\r|' + '#' * barlen + '-' * (50 - barlen) + '| ' +
+                       str(complete) + '%',
+
+    if complete == 100:
+        print 'File complete'
+
+
 class sudotarinfo(object):
     size = None
 
